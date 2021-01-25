@@ -1,3 +1,9 @@
 const mongoose = require ('mongoose');
 
-mongoose.connect()
+const URI='mongodb://localhost/link_manager';
+
+mongoose.connect(URI)
+    .then(db=> console.log('DB connected'))
+    .catch (err=> console.error(err));
+
+module.exports=mongoose;

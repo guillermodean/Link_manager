@@ -2,6 +2,7 @@ const express = require('express');
 const app = express ();
 const morgan= require('morgan');
 const path = require('path');
+const {mongoose}= require('./database');
 
 //Settings
 app.set('port',process.env.PORT || 3000);  //toma el puerto que me está dando el servicio de la nube
