@@ -7,17 +7,54 @@ class App extends Component {
         super();
         this.state={
             title:'',
-            Description:'',
-            Category:'',
-            URL:'',
-            count:0+1
+            description:'',
+            category:'',
+            url:'',
+            count:0+1,
+            links:[]
         };
         this.addlink=this.addlink.bind(this);
+        this.handleChange=this.handleChange.bind(this);
     }
     addlink(e){
-        console.log(this.state);
+        fetch('/api/links', {
+            method:'POST',
+            body: JSON.stringify(this.state),
+            headers:{
+                'Accept':'application/json',
+                'Content-Type':'application/json'
+            }
+        })
+            .then(res => res.json())
+            .then(data => {
+                console.log(data)
+                M.toast({html:'Tarea guardada'})  //M-> MAterialize, toast-> manda un mensaje por pantalla
+                this.setState({title:'',description:'',category:'',url:'',count:0})
+            })
+            .catch(err => console.error(err));
+
         e.preventDefault();
     }
+    componentDidMount(){
+        this.fetchlinks();
+    }
+    fetchlinks(){
+        fetch('api/links')   //por defecto envia un GET
+            .then(res => res.json())
+            .then(data => 
+                {
+                this.setState({links:data});
+                console.log(this.state.links)}
+            )
+    }
+    handleChange(e) {
+        const {name,value} = e.target;
+        this.setState({
+            [name]:value
+        });
+
+    }
+    
     render() {
         return (
             <div>
@@ -36,23 +73,23 @@ class App extends Component {
                                     <form onSubmit={this.addlink}>
                                         <div className="row">
                                             <div className="input-field col s12">
-                                                <input type="text" placeholder="link" />
+                                                <input name="title" onChange={this.handleChange} type="text" placeholder="link" value={this.state.title} />
                                             </div>
                                         </div>
                                         <div className="row">
                                             <div className="input-field col s12">
-                                                <textarea className="materialize-textarea" placeholder="link Description" ></textarea>
+                                                <textarea name="description" onChange={this.handleChange} className="materialize-textarea" placeholder="link Description" value={this.state.description} ></textarea>
                                             </div>
                                         </div>
                                         <div className="row">
                                             <div className="input-field col s12">
-                                                <input type="text" placeholder="Categoria" />
+                                                <input name="category" onChange={this.handleChange} type="text" placeholder="Categoria" value={this.state.category} />
                                             </div>
 
                                         </div>
                                         <div className="row">
                                             <div className="input-field col s12">
-                                                <input type="text" placeholder="URL" />
+                                                <input name="url" onChange={this.handleChange} type="text" placeholder="URL" value={this.state.url} />
                                             </div>
                                         </div>
                                         <button className="btn light-blue darken-4" type="submit">enviar</button>
@@ -61,6 +98,31 @@ class App extends Component {
                             </div>
                         </div>
                         <div className="col s7">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Descripcion</th>
+                                        <th>Categoria</th>
+                                        <th>url</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {
+                                        this.state.links.map(link =>{
+                                            return (
+                                                <tr>
+                                                    <td>{link.title}</td>
+                                                    <td>{link.description}</td>
+                                                    <td>{link.category}</td>
+                                                    <td>
+                                                        <a href={link.url} className="btn light-blue darken-4">Ir</a></td>
+                                                </tr>
+                                            )
+                                        })
+                                    }
+                                </tbody>
+                            </table>
 
                         </div>
                     </div>
