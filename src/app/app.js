@@ -10,13 +10,27 @@ class App extends Component {
             description:'',
             category:'',
             url:'',
-            count:0+1,
-            links:[]
+            count:0,
+            links:[],
+            _id:''
         };
         this.addlink=this.addlink.bind(this);
         this.handleChange=this.handleChange.bind(this);
     }
     addlink(e){
+       if(this.state._id) {
+           fetch(`/api/lins/${this.state._id}`, {
+               method:'PUT',
+               body: JSON.stringify(this.state),
+               headers:{
+                'Accept':'application/json',
+                'Content-Type':'application/json'
+               }
+           })
+           .then( res => res.json())
+           .then(data => console.log (data))
+       }
+       else {
         fetch('/api/links', {
             method:'POST',
             body: JSON.stringify(this.state),
@@ -28,10 +42,12 @@ class App extends Component {
             .then(res => res.json())
             .then(data => {
                 console.log(data)
-                M.toast({html:'Tarea guardada'})  //M-> MAterialize, toast-> manda un mensaje por pantalla
-                this.setState({title:'',description:'',category:'',url:'',count:0})
+                M.toast({html:'Enlace guardada'})  //M-> MAterialize, toast-> manda un mensaje por pantalla
+                this.setState({title:'',description:'',category:'',url:'',count:0});
+                this.fetchlinks();
             })
             .catch(err => console.error(err));
+       }
 
         e.preventDefault();
     }
@@ -52,6 +68,42 @@ class App extends Component {
         this.setState({
             [name]:value
         });
+
+    }
+    deleteLink(id){
+        if(confirm (' Estas seguro de querer eliminar el enlace')) {
+            fetch('api/links/'+id,{
+                method:'DELETE',
+                headers:{
+                    'Accept':'application/json',
+                    'Content-Type':'application/json'
+                }
+    
+            })
+            .then (res=> res.json())
+            .then (data=> {
+                console.log (data);
+                M.toast({html:'Ling elminiada'});
+                
+                this.fetchlinks();
+            });
+        }
+    }
+    updateLink(id) {
+        fetch(`/api/links/${id}`)
+            .then(res=>res.json())
+            .then(data=>{
+                 console.log(data)
+                 this.setState({
+                     title:data.title,
+                     description:data.description,
+                     category:data.category,
+                     url:data.url,
+                     _id:data._id
+                 })
+            });
+    }
+    countLink (id){
 
     }
     
@@ -111,12 +163,20 @@ class App extends Component {
                                     {
                                         this.state.links.map(link =>{
                                             return (
-                                                <tr>
+                                                <tr key={link._id}>
                                                     <td>{link.title}</td>
                                                     <td>{link.description}</td>
                                                     <td>{link.category}</td>
                                                     <td>
-                                                        <a href={link.url} className="btn light-blue darken-4">Ir</a></td>
+                                                        <a href={link.url} className="btn light-blue darken-4" onClick={()=>this.countLink(link._id)} >Ir</a></td>
+                                                        <td>
+                                                            <button className="btn light-blue darken-4" onClick={()=>this.updateLink(link._id)}>
+                                                                <i className="material-icons">edit</i>
+                                                            </button>
+                                                            <button className="btn red darken-4" style={{marginTop: '3px'}} onClick={()=>this.deleteLink(link._id)}>
+                                                                <i className="material-icons">delete</i>
+                                                            </button>
+                                                        </td>
                                                 </tr>
                                             )
                                         })
